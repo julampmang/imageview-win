@@ -1,0 +1,29 @@
+# 构建产物
+/dist/
+*.exe
+*.pdb
+*.mdb
+
+# 工具脚本的编译产物（源码保留）
+/tools/capture.exe
+/tools/paint-bench.exe
+
+# 大体积测试素材：由 tools/make-testassets.py 生成（--bench 才需要）
+/tests/assets/big.jpg
+
+# 本地截图目录（不入库，避免仓库被 1.6MB 截图撑大）
+/docs/
+
+# 运行期数据与临时文件
+/data/
+/tests/tmp/
+*.log
+*.ini
+
+# 编辑器 / 系统
+.vs/
+.idea/
+*.user
+*.suo
+Thumbs.db
+desktop.ini

@@ -1,0 +1,16 @@
+# 默认按文本处理，检出时统一 CRLF（本项目只面向 Windows）
+* text=auto eol=crlf
+
+# 图片资源必须标记为二进制，避免被行尾转换破坏
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.jpg binary
+
+# 脚本
+*.ps1 text eol=crlf
+*.cs text eol=crlf
+*.md text eol=lf

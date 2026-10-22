@@ -1,5 +1,9 @@
 # ImageView
 
+[![build](https://github.com/julampmang/imageview-win/actions/workflows/build.yml/badge.svg)](https://github.com/julampmang/imageview-win/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/julampmang/imageview-win)](https://github.com/julampmang/imageview-win/releases)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 A fast, lightweight image viewer for Windows 10/11 — a single 220 KB `.exe` with no runtime, no
 installer and no dependencies. Built with the C# compiler that ships with Windows.
 
@@ -24,7 +28,11 @@ installer and no dependencies. Built with the C# compiler that ships with Window
 
 ---
 
-# ImageView — Windows 10 轻量图片查看器
+# ImageView
+
+[![build](https://github.com/julampmang/imageview-win/actions/workflows/build.yml/badge.svg)](https://github.com/julampmang/imageview-win/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/julampmang/imageview-win)](https://github.com/julampmang/imageview-win/releases)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE) — Windows 10 轻量图片查看器
 
 替代系统「照片」查看器的单文件绿色程序。用**系统自带的 C# 编译器**构建，不需要安装 .NET SDK、
 不需要 MSVC、不需要任何第三方运行时。

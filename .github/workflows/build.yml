@@ -1,0 +1,55 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建（系统自带 csc，无 SDK）
+        shell: pwsh
+        run: |
+          ./build.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 自检（126 项断言）
+        shell: pwsh
+        run: |
+          $proc = Start-Process -FilePath .\dist\ImageView.exe -ArgumentList '--selftest' -PassThru -Wait `
+            -RedirectStandardOutput selftest.out -RedirectStandardError selftest.err
+
+          # 日志落在 AppPaths.DataDir：正常用户会话是 %LOCALAPPDATA%\ImageView，受限环境才是 exe\data
+          $candidates = @(
+            (Join-Path $env:LOCALAPPDATA 'ImageView\selftest.log'),
+            (Join-Path (Get-Location) 'dist\data\selftest.log')
+          )
+          $log = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+          if ($log) {
+            Get-Content -LiteralPath $log -Encoding UTF8 | Select-Object -Last 40
+          } else {
+            Write-Host '没有找到 selftest.log，输出：'
+            Get-Content selftest.out -ErrorAction SilentlyContinue
+            Get-Content selftest.err -ErrorAction SilentlyContinue
+          }
+
+          if ($proc.ExitCode -ne 0) {
+            Write-Error "自检失败，退出码 $($proc.ExitCode)"
+            exit 1
+          }
+          Write-Host '自检通过'
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImageView-win64
+          path: dist/ImageView.exe
+          if-no-files-found: error

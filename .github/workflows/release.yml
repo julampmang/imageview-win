@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建
+        shell: pwsh
+        run: |
+          ./build.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 自检
+        shell: pwsh
+        run: |
+          $proc = Start-Process -FilePath .\dist\ImageView.exe -ArgumentList '--selftest' -PassThru -Wait `
+            -RedirectStandardOutput selftest.out -RedirectStandardError selftest.err
+          $candidates = @(
+            (Join-Path $env:LOCALAPPDATA 'ImageView\selftest.log'),
+            (Join-Path (Get-Location) 'dist\data\selftest.log')
+          )
+          $log = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+          if ($log) { Get-Content -LiteralPath $log -Encoding UTF8 | Select-Object -Last 40 }
+          if ($proc.ExitCode -ne 0) { Write-Error "自检失败"; exit 1 }
+
+      - name: 打包
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          New-Item -ItemType Directory -Force -Path pkg | Out-Null
+          Copy-Item dist\ImageView.exe, README.md, LICENSE pkg\
+          Compress-Archive -Path pkg\* -DestinationPath "ImageView-$tag-win64.zip" -Force
+
+      - name: 建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ImageView-*-win64.zip
+          body: |
+            Windows 10/11 单文件绿色版，解压即用，无需安装 .NET SDK 或任何运行时。
+
+            - 首次运行若被 SmartScreen 拦下：`右键 exe → 属性 → 解除锁定`，或执行
+              `Unblock-File .\ImageView.exe`。
+            - 命令行参数见 README（`--help` / `--selftest` / `--bench` / `--probe`）。

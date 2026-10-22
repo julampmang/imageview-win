@@ -34,7 +34,13 @@ jobs:
           )
           $log = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
           if ($log) {
-            Get-Content -LiteralPath $log -Encoding UTF8 | Select-Object -Last 40
+            $lines = Get-Content -LiteralPath $log -Encoding UTF8
+            $failed = $lines | Select-String -SimpleMatch '[FAIL]'
+            if ($failed) {
+              Write-Host '失败断言：'
+              $failed | ForEach-Object { Write-Host $_.Line }
+            }
+            $lines | Select-Object -Last 3
           } else {
             Write-Host '没有找到 selftest.log，输出：'
             Get-Content selftest.out -ErrorAction SilentlyContinue
@@ -46,6 +52,14 @@ jobs:
             exit 1
           }
           Write-Host '自检通过'
+
+      - name: 上传自检日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selftest-log
+          path: '**/selftest.log'
+          if-no-files-found: ignore
 
       - name: 上传产物
         uses: actions/upload-artifact@v4

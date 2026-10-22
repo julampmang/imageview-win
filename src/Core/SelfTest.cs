@@ -267,9 +267,12 @@ namespace ImageView.Core
                 using (ImageDocument doc = ImageDocument.Open(webp))
                 {
                     bool ok = doc.IsValid;
-                    if (!WicDecoder.Available)
+                    bool codecPresent = WicDecoder.Available && WicDecoder.CanCreateDecoder(webp);
+                    // Win10 的 WebP 是可选系统扩展（GitHub runner 上就没有）；
+                    // 连解码器都创建不了 = 这台机器不支持该格式，跳过而不是判失败。
+                    if (!codecPresent)
                     {
-                        AppLog.Line("  [SKIP] WebP（无 WIC 解码器）：{0}", doc.Error);
+                        AppLog.Line("  [SKIP] 本机没有 WebP 编解码器（系统可选扩展），跳过 WebP 断言");
                     }
                     else
                     {

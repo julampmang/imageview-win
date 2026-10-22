@@ -211,6 +211,34 @@ namespace ImageView.Core
             }
         }
 
+        /// <summary>
+        /// 只做探测：这台机器能否为这个文件创建 WIC 解码器。
+        ///
+        /// 用来区分"系统没装这个格式的编解码器"（WebP/HEIC 在 Win10 上是可选扩展）
+        /// 和"我们的解码流程有问题"——前者应该跳过断言，后者才是失败。
+        /// </summary>
+        internal static bool CanCreateDecoder(string path)
+        {
+            IWICImagingFactory factory = Factory();
+            if (factory == null)
+            {
+                return false;
+            }
+            IWICBitmapDecoder decoder = null;
+            try
+            {
+                decoder = Open(factory, path);
+                return decoder != null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                ReleaseCom(decoder);
+            }
+        }
         private static IWICBitmapDecoder Open(IWICImagingFactory factory, string path)
         {
             try
